@@ -6,7 +6,7 @@ file(GLOB CLEARANCE_FIELD_SOURCES *.cpp)
 
 add_library(ClearanceField SHARED ${CLEARANCE_FIELD_SOURCES})
 set_target_properties(ClearanceField PROPERTIES PUBLIC_HEADER
-                                                "ClearanceField.hpp")
+                                                "ClearanceField.h")
 
 install(
   TARGETS ClearanceField
