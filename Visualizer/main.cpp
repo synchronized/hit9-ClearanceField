@@ -14,7 +14,6 @@ using ClearanceField::inf;
 using ClearanceField::ObstacleChecker;
 using ClearanceField::TrueClearanceField;
 
-const int GRID_SIZE = 32;
 const int N = 100;
 
 int GRID[N][N] = { 0 };
@@ -22,6 +21,7 @@ int GRID[N][N] = { 0 };
 struct Options
 {
 	int w, h, u;
+	int girdSize;
 	int costUnit, diagonalCostUnit;
 	int fontSize;
 	// implementer:
@@ -119,6 +119,10 @@ int ParseOptionsFromCommandline(int argc, char* argv[], Options& options)
 		.help("height of grid map")
 		.default_value(16)
 		.store_into(options.h);
+	program.add_argument("-gs", "--gird-size")
+		.help("gird size")
+		.default_value(32)
+		.store_into(options.girdSize);
 	program.add_argument("-u")
 		.help("upper bound of distance to maintain")
 		.default_value(1024)
@@ -152,6 +156,11 @@ int ParseOptionsFromCommandline(int argc, char* argv[], Options& options)
 	{
 		spdlog::error("w or h is too large");
 		return 2;
+	}
+	if (options.girdSize <= 0)
+	{
+		spdlog::error("gird size is too small");
+		return 3;
 	}
 	return 0;
 }
@@ -197,7 +206,7 @@ int Visualizer::Init()
 	}
 
 	// Creates window.
-	int w = options.w * GRID_SIZE, h = options.h * GRID_SIZE;
+	int w = options.w * options.girdSize, h = options.h * options.girdSize;
 	window = SDL_CreateWindow("visualizer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h,
 		SDL_WINDOW_SHOWN);
 	if (window == nullptr)
@@ -309,7 +318,7 @@ int Visualizer::handleInputs()
 				}
 				break;
 			case SDL_MOUSEBUTTONDOWN: // invert obstacles
-				handleInvertObstacle(e.button.x / GRID_SIZE, e.button.y / GRID_SIZE);
+				handleInvertObstacle(e.button.x / options.girdSize, e.button.y / options.girdSize);
 				spdlog::info("invert an obstacle");
 				break;
 		}
@@ -347,7 +356,10 @@ void Visualizer::draw()
 	{
 		for (int x = 0; x < options.w; ++x)
 		{
-			SDL_Rect rect{ x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE };
+			SDL_Rect rect{ 
+				x * options.girdSize, y * options.girdSize, 
+				options.girdSize, options.girdSize 
+			};
 			SDL_Rect inner = { rect.x + 1, rect.y + 1, rect.w - 2, rect.h - 2 };
 			// black border
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
